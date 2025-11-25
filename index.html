@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wind Energy Impact Calculator</title>
+    <meta name="description" content="Comprehensive wind energy impact calculator for analyzing energy production, environmental effects, costs, and community impacts of wind farms.">
+    <meta property="og:title" content="Wind Energy Impact Calculator">
+    <meta property="og:description" content="Comprehensive wind energy impact calculator for analyzing energy production, environmental effects, costs, and community impacts of wind farms.">
+    <meta property="og:type" content="website">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="styles.css?v=1.1">
+    <style>
+        /* Additional styles for Lovable design integration */
+        .wind-icon { width: 24px; height: 24px; display: inline-block; }
+        .icon-zap, .icon-trees, .icon-dollar, .icon-globe { width: 24px; height: 24px; }
+    </style>
+</head>
+<body>
+    
+    <nav class="navbar" id="navbar">
+        <div class="navbar-container">
+            <a href="#hero" class="navbar-brand" onclick="scrollToSection('hero'); return false;">
+                Wind Energy Impact
+            </a>
+            <div class="navbar-links">
+                <a href="#calculator" class="navbar-link" onclick="scrollToSection('calculator'); return false;">Calculator</a>
+                <a href="#images" class="navbar-link" onclick="scrollToSection('images'); return false;">Images</a>
+                <a href="#statement" class="navbar-link" onclick="scrollToSection('statement'); return false;">Academic Perspectives</a>
+                <a href="#sources" class="navbar-link" onclick="scrollToSection('sources'); return false;">Works Cited</a>
+            </div>
+        </div>
+    </nav>
+
+    
+    <section id="hero" class="hero-section">
+        <div class="hero-pattern">
+            <div class="hero-pattern-circle" style="top: 5rem; left: 2.5rem; width: 8rem; height: 8rem;"></div>
+            <div class="hero-pattern-circle" style="bottom: 10rem; right: 5rem; width: 12rem; height: 12rem;"></div>
+            <div class="hero-pattern-circle" style="top: 50%; left: 33%; width: 6rem; height: 6rem;"></div>
+        </div>
+        <div class="hero-container">
+            <h1 class="hero-title animate-fade-up">Wind Energy Impact Calculator</h1>
+            <div class="hero-content" style="max-width: 900px; margin: 0 auto;">
+                <div class="card animate-fade-up" style="animation-delay: 0.1s;">
+                    <p style="font-size: 1.25rem; line-height: 1.9; margin-bottom: 1.5rem;">
+                        People often state that renewable energy is the future and claim it is a straightforward 
+                        solution to environmental problems. The solutions are painted as clean, harmless, and 
+                        beneficial to all. However, this framing, which may be helpful for implementing renewable 
+                        energy, leaves out many of the social and environmental problems associated with this new 
+                        form of energy. Some scholars attempt to change this common belief that renewable energy 
+                        automatically leads to improvement. Writers like Howe, Lennon, and Hardin directly and indirectly display that 
+                        different forms of energy bring many different tradeoffs and consequences. The goal of the 
+                        wind-energy calculator is to visualize the benefits and drawbacks of this specific renewable 
+                        energy, bringing up points from the scholars, so that users can form their own conclusions about wind 
+                        energy.
+                    </p>
+                    <div class="card" style="border-left: 3px solid hsl(var(--accent)); background-color: hsl(var(--accent) / 0.05); padding: 0.5rem 0.75rem; margin-top: 0.5rem;">
+                        <div style="display: flex; align-items: baseline; gap: 0.5rem;">
+                            <span style="font-weight: 600; color: hsl(var(--accent)); font-size: 0.75rem;">Data (Texas Only):</span>
+                            <span style="font-size: 0.6875rem; color: hsl(var(--muted-foreground)); line-height: 1.3;">
+                                Texas High Resolution Wind Resource Dataset from NREL (53,383 grid points at ~5.6km resolution).
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    
+    <section id="calculator" class="calculator-section">
+        <div class="calculator-container">
+            <div style="text-align: center; margin-bottom: 3rem;" class="animate-fade-up">
+                <h2 class="section-title">Configure Your Wind Farm (Texas Only)</h2>
+            </div>
+
+            <div class="calculator-grid">
+                
+                <div style="display: flex; flex-direction: column; gap: 1rem;" class="animate-fade-up">
+                    <div id="map" class="map-container-new"></div>
+                    <p style="text-align: center; color: hsl(var(--muted-foreground)); font-style: italic; margin-bottom: 0.5rem;">
+                        Click on the map to select a location
+                    </p>
+                    <div id="selected-location" class="card" style="padding: 1rem; display: none; text-align: center;">
+                        <div id="location-wind-info" style="font-size: 1rem; font-weight: 500; color: hsl(var(--foreground));"></div>
+                    </div>
+                </div>
+
+                
+                <div class="animate-fade-up" style="animation-delay: 0.2s;">
+                    <div class="card" style="padding: 2rem; box-shadow: var(--shadow-medium);">
+                        <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem;">Wind Farm Parameters</h3>
+
+                        <div style="display: flex; flex-direction: column; gap: 2rem;">
+                            
+                            <div class="form-group">
+                                <label for="turbine-count" class="form-label">Number of Turbines</label>
+                                <select id="turbine-count" class="form-select">
+                                    <option value="10">10 turbines</option>
+                                    <option value="25">25 turbines</option>
+                                    <option value="50" selected>50 turbines</option>
+                                    <option value="75">75 turbines</option>
+                                    <option value="100">100 turbines</option>
+                                    <option value="150">150 turbines</option>
+                                </select>
+                            </div>
+
+                            
+                            <div class="form-group">
+                                <label for="turbine-size" class="form-label">Turbine Size</label>
+                                <select id="turbine-size" class="form-select">
+                                    <option value="1.5">1.5 MW (Small)</option>
+                                    <option value="2.5">2.5 MW (Medium)</option>
+                                    <option value="3.0" selected>3.0 MW (Medium)</option>
+                                    <option value="4.0">4.0 MW (Large)</option>
+                                    <option value="5.0">5.0 MW (Extra Large)</option>
+                                    <option value="8.0">8.0 MW (Offshore-class)</option>
+                                </select>
+                            </div>
+
+                            
+                            <div class="form-group">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                                    <label for="capacity-factor" class="form-label">Estimated Capacity Factor</label>
+                                    <span id="capacity-factor-value" style="font-size: 1.5rem; font-weight: 700; color: hsl(var(--primary));">35%</span>
+                                </div>
+                                <input type="range" id="capacity-factor" class="form-slider" min="20" max="50" value="35" step="1">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: hsl(var(--muted-foreground)); margin-top: 0.5rem;">
+                                    <span>20% (Low wind)</span>
+                                    <span>35% (Average)</span>
+                                    <span>50% (Excellent)</span>
+                                </div>
+                            </div>
+
+                            
+                            <button id="calculate-btn" class="btn btn-primary">Calculate Impact</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    
+    <section id="results-section" class="results-section" style="display: none;">
+        <div class="results-grid">
+            <div style="text-align: center; margin-bottom: 3rem;" class="animate-fade-up">
+                <h2 class="section-title">Impact Analysis Results</h2>
+            </div>
+
+            
+            <div class="card result-card animate-fade-up" style="box-shadow: var(--shadow-medium);">
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
+                    <div style="width: 4px; height: 40px; background-color: hsl(var(--primary)); border-radius: 2px;"></div>
+                    <h3 style="font-size: 1.5rem; font-weight: 700;">Energy Production</h3>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                    <div>
+                        <div class="result-value text-primary" id="annual-energy">-</div>
+                        <div class="result-label">Annual Energy Production</div>
+                    </div>
+                    <div>
+                        <div class="result-value text-primary" id="avg-power">-</div>
+                        <div class="result-label">Average Power Output</div>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="card result-card animate-fade-up" style="animation-delay: 0.1s; box-shadow: var(--shadow-medium);">
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
+                    <div style="width: 4px; height: 40px; background-color: hsl(var(--secondary)); border-radius: 2px;"></div>
+                    <h3 style="font-size: 1.5rem; font-weight: 700;">Environmental Impact</h3>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div class="result-item">
+                        <span class="text-muted">CO₂ Emissions Avoided (annually)</span>
+                        <span style="font-weight: 600; color: hsl(var(--secondary));" id="co2-avoided">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="text-muted">Equivalent cars removed</span>
+                        <span style="font-weight: 600; color: hsl(var(--secondary));" id="co2-equivalent">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="text-muted">Land Required</span>
+                        <span style="font-weight: 600;" id="land-required">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="text-muted">Wildlife Impact Risk</span>
+                        <span style="font-weight: 600; color: #f97316;" id="wildlife-impact">-</span>
+                    </div>
+                    <div class="result-item" style="border-bottom: none;">
+                        <span class="text-muted">Noise Level (at 100m)</span>
+                        <span style="font-weight: 600;" id="noise-level">-</span>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="card result-card animate-fade-up" style="animation-delay: 0.2s; box-shadow: var(--shadow-medium);">
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
+                    <div style="width: 4px; height: 40px; background-color: hsl(var(--accent)); border-radius: 2px;"></div>
+                    <h3 style="font-size: 1.5rem; font-weight: 700;">Cost Analysis</h3>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div class="result-item">
+                        <span class="text-muted">Estimated Installation Cost</span>
+                        <span style="font-weight: 600;" id="installation-cost">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="text-muted">Cost per MW</span>
+                        <span style="font-weight: 600;" id="cost-per-mw">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="text-muted">Cost per MWh (levelized)</span>
+                        <span style="font-weight: 600; color: hsl(var(--accent));" id="cost-per-mwh">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="text-muted">Transport Cost Estimate</span>
+                        <span style="font-weight: 600;" id="transport-cost">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="text-muted">Total Initial Investment</span>
+                        <span style="font-weight: 600; color: hsl(var(--accent)); font-size: 1.125rem;" id="total-investment">-</span>
+                    </div>
+                    <div class="result-item" style="border-bottom: none;">
+                        <span class="text-muted">Estimated Payback Period</span>
+                        <span style="font-weight: 600; color: hsl(var(--secondary));" id="payback-period">-</span>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="card animate-fade-up" style="animation-delay: 0.4s; padding: 2rem; box-shadow: var(--shadow-medium);">
+                <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem; text-align: center;">Balanced Perspective</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+                    <div>
+                        <h4 style="font-weight: 600; color: hsl(var(--secondary)); margin-bottom: 1rem;">
+                            Benefits
+                        </h4>
+                        <ul id="pros-list" style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 1rem;"></ul>
+                    </div>
+                    <div>
+                        <h4 style="font-weight: 600; color: hsl(var(--destructive)); margin-bottom: 1rem;">
+                            Drawbacks
+                        </h4>
+                        <ul id="cons-list" style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 1rem;"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    
+    <section id="images" class="images-section">
+        <div class="container">
+            <div style="max-width: 1024px; margin: 0 auto; text-align: center; margin-bottom: 3rem;" class="animate-fade-up">
+                <h2 class="section-title">Wind Turbines</h2>
+                <p style="font-size: 1.125rem; color: hsl(var(--muted-foreground));">
+                    Wind turbines are often depicted in beautiful green fields in an attempt to display their connection to 
+                    natural settings and environmental benefit. Almost never are there images of wind turbines being 
+                    produced in factories or assembled through industrial processes. This section includes images of wind 
+                    turbines in different states to provide a full perspective, rather than just the aesthetic image 
+                    commonly shown.
+                </p>
+            </div>
+
+            <div class="images-grid">
+                <div class="image-card animate-fade-up" style="animation-delay: 0.1s;">
+                    <img src="src/assets/screenshot1.png" alt="Wind energy impact analysis">
+                    <div class="image-card-content">
+                        <h3 class="image-card-title">In Nature</h3>
+                        <p class="image-card-description">
+                            This is what most people think of when they see renewable energy
+                        </p>
+                    </div>
+                </div>
+                <div class="image-card animate-fade-up" style="animation-delay: 0.2s;">
+                    <img src="src/assets/screenshot2.png" alt="Wind turbine manufacturing">
+                    <div class="image-card-content">
+                        <h3 class="image-card-title">Manufacturing</h3>
+                        <p class="image-card-description">
+                            Factories making turbine parts need a lot of resources and energy to produce them
+                        </p>
+                    </div>
+                </div>
+                <div class="image-card animate-fade-up" style="animation-delay: 0.3s;">
+                    <img src="src/assets/screenshot3.png" alt="Wind turbine transport">
+                    <div class="image-card-content">
+                        <h3 class="image-card-title">Transport</h3>
+                        <p class="image-card-description">
+                            Transporting these huge blades takes a lot of planning and special equipment
+                        </p>
+                    </div>
+                </div>
+                <div class="image-card animate-fade-up" style="animation-delay: 0.4s;">
+                    <img src="src/assets/screenshot4.png" alt="Wind turbines near community">
+                    <div class="image-card-content">
+                        <h3 class="image-card-title">Community</h3>
+                        <p class="image-card-description">
+                            When turbines are close to where people live, it affects noise, the aesthetics, and property values
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    
+    <section id="statement" class="statement-section">
+        <div class="statement-container">
+
+            <div class="card statement-card animate-fade-up">
+                <div class="statement-content">
+                    <h3>Cymene Howe's <em>Ecologics</em></h3>
+                    <p>
+                        Cymene Howe's <em>Ecologics</em> illustrates how wind energy projects can affect lands and 
+                        people in multiple ways. Her work is based in southern Mexico, a region that is very popular 
+                        for wind energy due to stronger winds. She explains that the meaning of wind has changed as 
+                        the number of turbines has increased. It was once understood as a natural force, but now it 
+                        is seen as something that can be extracted or a resource. This change brings new expectations of 
+                        what the purpose of wind is, who can use it, and who can benefit from it. Howe describes land 
+                        owners like Don Jose, who has leased parts of his property to a wind company. This allows him 
+                        to have a steady income and live better, claiming that he believes his prosperity comes from 
+                        the income generated from the land. However, the surrounding communities do not share these 
+                        same advantages. They have to live with the noise, dust, construction, and changing landscape 
+                        due to the wind turbines, and do not receive any compensation. Other communities face pressure 
+                        from companies looking for access to property to place wind turbines. Howe's writing shows that 
+                        wind energy cannot just be understood through pounds of carbon saved or megawatt output, but 
+                        also as a force that affects communities, and benefits some while 
+                        harming others. This complexity is shown in the tool through its consideration of environmental 
+                        impacts, the amount of land needed, and sound level, on top of just energy produced, which 
+                        provides a broader evaluation of whether wind turbines are truly beneficial. This helps people 
+                        understand what the communities and people who live near the turbines, like in Howe's writing, 
+                        are affected by the turbines rather than just what large corporations see.
+                    </p>
+
+                    <h3>Lennon's "Subjects of the Sun"</h3>
+                    <p>
+                        Lennon's "Subjects of the Sun: Urban Solarities and the Governance of Life in the Shadows of 
+                        Racial Capitalism" shows how renewable energy can reinforce preexisting inequalities. He focuses 
+                        on the solar-powered microgrid in the Marcus Garvey Apartments in Brownsville, New York. He writes 
+                        about how the apartments have promotional images presenting the solar panels as clean and sustainable, 
+                        but the residents themselves were not even aware of the microgrid. This reveals a gap between the 
+                        presentation for the project and the people who actually benefit from it. One interesting component 
+                        that Lennon sheds light on is that people often encounter renewable energy only through digital 
+                        images and not through physical interaction. He claims that this system of renewable energy is often 
+                        understood through a visual economy, which impresses people through its aesthetics rather than 
+                        through physical experience or technical understanding. Lennon also claims that solar manufacturing depends on supply chains that involve toxic chemicals.                         Connecting this to wind turbines, wind turbines are often depicted in beautiful green fields in 
+                        an attempt to display their connection to natural settings and environmental benefit. Almost never are 
+                        there images of wind turbines being produced in factories or assembled through industrial processes. 
+                        In order to address this, this website includes multiple images of wind turbines in different states 
+                        to provide a full perspective. Information is provided so that the user is able to gain a full picture 
+                        of wind turbines and enough technical information to be able to make an informed opinion, rather than 
+                        just based on aesthetics.
+                    </p>
+
+                    <h3>Garrett Hardin's "The Tragedy of the Commons"</h3>
+                    <p>
+                        Garret Hardin's "The Tragedy of the Commons" adds a more theoretical foundation for understanding 
+                        the ideas described by Howe and Lennon. Hardin discusses the situation in which individuals pursue 
+                        benefits from shared resources while the costs are distributed across the community. For example, 
+                        he explains, "Each man is locked into a system that compels him to increase his herd without limit 
+                        in a world that is limited." His analogy with grazing land applies directly to energy, but in the 
+                        opposite way. Society benefits directly from electricity and reduced emissions. However, communities 
+                        closest to this new kind of renewable energy infrastructure often experience negative side effects 
+                        such as noise, habitat disruption, and altered landscapes. In this case, the benefits are spread out, 
+                        while the burdens are more concentrated. Harden's writing really shows that there can be no energy 
+                        system that is free of burdens or conflicts. No matter where the energy comes from, somewhere someone 
+                        bears the cost, even if it is reduced compared to other ways of generating energy. Hardin shows that 
+                        resource decisions always involve tradeoffs because all resources are ultimately limited. Decisions 
+                        about where to place wind turbines or how many to install involve negotiation between landowners and corporations, but it is also important to look at the effects at the community level. When using the tool, it is important to take 
+                        into consideration where the turbines are located, which certain communities they could be affecting, and 
+                        how the benefits and harm of the project may be distributed across the regions.
+                    </p>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    
+    <section class="conclusion-section">
+        <div class="container">
+            <div style="max-width: 1024px; margin: 0 auto;" class="animate-fade-up">
+                <div class="card conclusion-card">
+                    <div style="display: flex; align-items: start; gap: 1rem; margin-bottom: 1rem;">
+                        <div style="width: 4px; height: 40px; background-color: hsl(var(--accent)); border-radius: 2px; margin-top: 0.25rem;"></div>
+                        <h2 style="font-size: 1.875rem; font-weight: 700;">Conclusion</h2>
+                    </div>
+                    <div style="margin-left: 4rem;">
+                        <p style="font-size: 1.125rem; line-height: 1.8; margin-bottom: 1rem;">
+                            The motivation behind this calculator is to create a clear way for users to understand renewable 
+                            energy through self-exploration. Much discussion about wind power often relies on simplified images or 
+                            generalized claims that mask the complexities of these forms of energy production under the name of 
+                            sustainability, as outlined by the aforementioned authors. It often focuses on the projected environmental 
+                            benefits without displaying the costs that are associated with these benefits. The goal is to 
+                            respond to this gap in general understanding by offering a tool that makes it possible to examine wind 
+                            energy from multiple perspectives. It doesn't present information in a persuasive manner, rather, it 
+                            encourages reflection. The user is invited to take all the information in order to form their own opinions 
+                            and position on wind energy. However, more important than just coming to a conclusion, the calculator displays 
+                            the tensions surrounding wind energy.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    
+    <section id="sources" class="sources-section">
+        <div class="container">
+            <div style="max-width: 1024px; margin: 0 auto;">
+                <div style="text-align: center; margin-bottom: 3rem;" class="animate-fade-up">
+                    <h2 class="section-title">Works Cited</h2>
+                </div>
+
+                <div id="sources-list" style="display: flex; flex-direction: column; gap: 1rem;">
+                    
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    
+    <footer class="footer">
+        <div class="container">
+            <p class="footer-text">
+                Oskar Baumgarte
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+    <script src="script_integration.js?v=3.0"></script>
+    <script>
+        // Smooth scroll function
+        function scrollToSection(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (navbar) {
+                if (window.scrollY > 20) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+

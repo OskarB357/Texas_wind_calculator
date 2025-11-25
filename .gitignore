@@ -1,0 +1,15 @@
+# NREL data files (too large for git)
+nrel_data/
+*.h5
+*.hdf5
+
+# Logs
+*.log
+api_server.log
+web_server.log
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
