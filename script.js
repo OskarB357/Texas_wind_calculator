@@ -294,8 +294,9 @@ async function calculateImpacts() {
     document.getElementById('noise-level').textContent = `${noiseLevel} dB`;
     document.getElementById('installation-cost').textContent = 
         '$' + formatNumber(installationCost);
+    const costPerMW = installationCost / totalCapacityMW;
     document.getElementById('cost-per-mw').textContent = 
-        '$' + formatNumber(installationCost / totalCapacityMW / 1000) + ' per kW';
+        '$' + formatNumber(costPerMW / 1000000) + ' million per MW';
     document.getElementById('cost-per-mwh').textContent = 
         '$' + lcoeWind + ' per MWh';
     document.getElementById('transport-cost').textContent = 
